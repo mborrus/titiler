@@ -294,6 +294,18 @@
           <button id="btn-rescale" class='btn bts--xs btn--stroke bg-darken25-on-hover inline-block txt-s color-black mt6'>Apply</button>
         </div>
 
+        <!-- Basemap Selection -->
+        <div class="px6 py6 w-full">
+          <div class='txt-h5 mb6 color-black'><svg class='icon icon--l inline-block'><use xlink:href='#icon-map'/></svg> Basemap</div>
+          <div class='select-container wmax-full'>
+            <select id='basemap-selector' class='select select--s select--stroke wmax-full color-black'>
+              <option value='carto'>CartoDB Positron</option>
+              <option value='osm'>OpenStreetMap</option>
+            </select>
+            <div class='select-arrow color-black'></div>
+          </div>
+        </div>
+
         <div id='cformula-section' class='px6 py6'>
           <div class='txt-h5 mb6 color-black'>Color Formula</div>
           <input id="ColorFormulaValue" class='input input--s w-full color-black' value='' />
@@ -368,6 +380,24 @@ const dtype_ranges = {
   'uint64': [0, 18446744073709551615],
 }
 
+const basemaps = {
+  'carto': {
+    tiles: [
+      'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      'https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
+    ],
+    attribution: '<a href="https://developmentseed.org/titiler" target="_blank">Titiler</a> | <a href="https://carto.com/attributions">© CARTO</a> | © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  },
+  'osm': {
+    tiles: [
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+    ],
+    attribution: '<a href="https://developmentseed.org/titiler" target="_blank">Titiler</a> | <a href="http://www.openstreetmap.org/copyright">© OpenStreetMap</a>'
+  }
+}
+
 var map = new maplibregl.Map({
   container: 'map',
   style: {
@@ -375,11 +405,9 @@ var map = new maplibregl.Map({
     sources: {
       'basemap': {
         type: 'raster',
-        tiles: [
-          'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-        ],
+        tiles: basemaps.carto.tiles,
         tileSize: 256,
-        attribution: '<a href="https://developmentseed.org/titiler" target="_blank">Titiler</a> | <a href="http://www.openstreetmap.org/copyright">© OpenStreetMap</a>'
+        attribution: basemaps.carto.attribution
       }
     },
     layers: [
@@ -425,7 +453,14 @@ const setMapLayers = (url) => {
           tiles: data.tiles,
           tileSize: 256
         })
-        map.addLayer({id: 'raster-l', type: 'raster', source: 'raster-l'})
+        map.addLayer({
+          id: 'raster-l',
+          type: 'raster',
+          source: 'raster-l',
+          paint: {
+            'raster-opacity': 0.8
+          }
+        })
 
         //right
         map.addSource('raster-r', {
@@ -436,7 +471,14 @@ const setMapLayers = (url) => {
           tiles: data.tiles,
           tileSize: 256
         })
-        map.addLayer({id: 'raster-r', type: 'raster', source: 'raster-r'})
+        map.addLayer({
+          id: 'raster-r',
+          type: 'raster',
+          source: 'raster-r',
+          paint: {
+            'raster-opacity': 0.8
+          }
+        })
 
       } else {
         if (map.getLayer('raster')) map.removeLayer('raster')
@@ -450,7 +492,14 @@ const setMapLayers = (url) => {
           tiles: data.tiles,
           tileSize: 256
         })
-        map.addLayer({id: 'raster', type: 'raster', source: 'raster'})
+        map.addLayer({
+          id: 'raster',
+          type: 'raster',
+          source: 'raster',
+          paint: {
+            'raster-opacity': 0.8
+          }
+        })
       }
     })
     .catch(err => {
@@ -786,6 +835,18 @@ document.getElementById('btn-rescale').addEventListener('click', () => {
 
 document.getElementById('updateColor').addEventListener('click', () => {
   updateViz()
+})
+
+document.getElementById('basemap-selector').addEventListener('change', (e) => {
+  const basemapType = e.target.value
+  const basemapConfig = basemaps[basemapType]
+
+  // Update the basemap source
+  map.getSource('basemap').setTiles(basemapConfig.tiles)
+
+  // Update attribution (this updates the map control attribution)
+  // Note: MapLibre doesn't have a direct way to update attribution after init,
+  // but the tiles will update immediately
 })
 
 const switchPane = (event) => {
