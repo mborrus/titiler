@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(lsof:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker ps:*)",
+      "Bash(ssh icepond:*)",
+      "Bash(scp:*)",
+      "Bash(python test_flood_colormap.py:*)",
+      "Bash(python -m py_compile:*)",
+      "Bash(git restore:*)",
+      "Bash(curl:*)",
+      "Bash(aws s3 cp:*)",
+      "Bash(aws s3 ls:*)",
+      "Bash(python3:*)",
+      "Bash(docker exec:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

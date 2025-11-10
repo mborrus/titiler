@@ -18,8 +18,12 @@ from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 from starlette_cramjam.middleware import CompressionMiddleware
 
+from rio_tiler.colormap import cmap as default_cmap
+
 from titiler.application import __version__ as titiler_version
+from titiler.application.custom_colormaps import custom_colormaps
 from titiler.application.settings import ApiSettings
+from titiler.core.dependencies import create_colormap_dependency
 from titiler.core.errors import DEFAULT_STATUS_CODES, add_exception_handlers
 from titiler.core.factory import (
     AlgorithmFactory,
@@ -52,6 +56,12 @@ logging.getLogger("rasterio.session").setLevel(logging.ERROR)
 logging.getLogger("rio-tiler").setLevel(logging.ERROR)
 
 api_settings = ApiSettings()
+
+# Merge default colormaps with custom colormaps
+cmap = default_cmap.register(custom_colormaps.data)
+
+# Create colormap dependency with merged colormaps
+ColorMapParams = create_colormap_dependency(cmap)
 
 # custom template directory
 templates_location: list[jinja2.BaseLoader] = (
@@ -127,6 +137,7 @@ if not api_settings.disable_cog:
         reader=Reader,
         router_prefix="/cog",
         add_ogc_maps=True,
+        colormap_dependency=ColorMapParams,
         extensions=[
             cogValidateExtension(),
             cogViewerExtension(),
@@ -152,6 +163,7 @@ if not api_settings.disable_stac:
         reader=STACReader,
         router_prefix="/stac",
         add_ogc_maps=True,
+        colormap_dependency=ColorMapParams,
         extensions=[stacViewerExtension(), stacRenderExtension(), wmtsExtension()],
         enable_telemetry=api_settings.telemetry_enabled,
         templates=titiler_templates,
@@ -176,6 +188,7 @@ if not api_settings.disable_mosaic:
     mosaic = MosaicTilerFactory(
         backend=MosaicJSONBackend,  # type: ignore
         router_prefix="/mosaicjson",
+        colormap_dependency=ColorMapParams,
         extensions=[
             MosaicJSONExtension(),
             mosaic_wmtsExtension(),
@@ -246,7 +259,10 @@ TITILER_CONFORMS_TO.update(algorithms.conforms_to)
 
 ###############################################################################
 # Colormaps endpoints
-cmaps = ColorMapFactory(templates=titiler_templates)
+cmaps = ColorMapFactory(
+    supported_colormaps=cmap,
+    templates=titiler_templates,
+)
 app.include_router(
     cmaps.router,
     tags=["ColorMaps"],

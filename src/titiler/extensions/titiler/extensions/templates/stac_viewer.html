@@ -127,6 +127,9 @@
         display: inherit;
       }
       #hide-arrow {
+        display: inline-block;
+        font-size: 25px;
+        line-height: 35px;
         -o-transition: all .5s ease;
         -webkit-transition: all .5s ease;
         -moz-transition: all .5s ease;
@@ -134,7 +137,7 @@
         transition: all ease .5s;
       }
       #hide-arrow.off {
-        transform: rotate(-180deg);
+        transform: rotate(180deg);
       }
       input:checked+.toggle {
         background: #fff;
@@ -144,17 +147,23 @@
         position: absolute;
         top: 0;
         height: 35px;
-        font-size: 35px;
+        width: 35px;
+        font-size: 25px;
         line-height: 35px;
         vertical-align: middle;
-        right: -35px;
-        color: #28333b;
-        background-color: #fff;
+        left: 0;
+        color: #fff;
+        background-color: #556671;
+        border: 2px solid #28333b;
+        border-radius: 0;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+        z-index: 100;
       }
       #btn-hide:hover {
         color: #fff;
-        background-color: #28333b;
+        background-color: #3bb2d0;
         cursor: pointer;
+        box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
       }
       .line-red {
         fill: none;
@@ -269,6 +278,8 @@
                 <option value=gist_earth>Earth</option>
                 <option value=ocean>Ocean</option>
                 <option value=terrain>Terrain</option>
+                <option value=flood_depth>Flood Depth</option>
+                <option value=flood_historic>Flood Historic</option>
               </select>
               <div class='select-arrow color-black'></div>
             </div>
@@ -318,7 +329,7 @@
         </div>
 
       </div>
-      <button id='btn-hide'><svg id='hide-arrow' class='icon'><use xlink:href='#icon-arrow-right'/></svg></button>
+      <button id='btn-hide'><span id='hide-arrow'>◄</span></button>
     </div>
 
     <div id='map'>
