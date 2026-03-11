@@ -5,12 +5,7 @@ RUN apt update && apt upgrade -y \
   && apt install curl -y \
   && rm -rf /var/lib/apt/lists/*
 
-# Ensure root certificates are always updated at evey container build
-# and curl is using the latest version of them
-# RUN mkdir /usr/local/share/ca-certificates/cacert.org
-# RUN cd /usr/local/share/ca-certificates/cacert.org && curl -k -O https://www.cacert.org/certs/root.crt
-# RUN cd /usr/local/share/ca-certificates/cacert.org && curl -k -O https://www.cacert.org/certs/class3.crt
-# ENV CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+# Update CA certificates from system packages (cacert.org is unreliable)
 RUN update-ca-certificates
 
 RUN python -m pip install -U pip
